@@ -1,5 +1,5 @@
 ## Description
-For from "dsavchenko/screenshare"
+from "dsavchenko/screenshare"
 
 I made it more appropriated with RTC and able to use mouse Icon with MSS. Prob i'll make specific for some windows, because i wanted to see my phone and my computer through spaceframe, and i suspect i need some security beside being purely on local
 
