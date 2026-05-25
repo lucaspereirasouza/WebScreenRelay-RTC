@@ -17,12 +17,66 @@
 
 from flask import Flask, request, flash, session
 from flask_bootstrap import Bootstrap
-from flask.templating import render_template
-import json, argparse
-from screen import screenlive
-from werkzeug.utils import redirect
-
-secret_key = u'f71b10b68b1bc00019cfc50d6ee817e75d5441bd5db0bd83453b398225cede69'
+HTML_PAGE = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ScreenShare WebRTC</title>
+    <style>
+        body {
+            background: #111;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <video
+        id="video"
+        autoplay
+        playsinline
+        muted>
+    </video>
+<script>
+const video = document.getElementById("video")
+const pc = new RTCPeerConnection()
+pc.ontrack = (event) => {
+    video.srcObject = event.streams[0]
+}
+pc.addTransceiver("video", {
+    direction: "recvonly"
+})
+async function start() {
+    const offer = await pc.createOffer()
+    await pc.setLocalDescription(offer)
+    const response = await fetch("/offer", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            sdp: pc.localDescription.sdp,
+            type: pc.localDescription.type
+        })
+    })
+    const answer = await response.json()
+    await pc.setRemoteDescription(answer)
+}
+start()
+</script>
+</body>
+</html>
+"""
 
 app = Flask(__name__)
 app.secret_key = secret_key
